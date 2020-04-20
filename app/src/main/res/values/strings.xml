@@ -2,4 +2,5 @@
     <string name="app_name">Shiny Inu</string>
     <string name="button_shiny">Make my day shiny!</string>
     <string name="app_loading">Please, wait...</string>
+    <string name="default_image_description">This is original image</string>
 </resources>
