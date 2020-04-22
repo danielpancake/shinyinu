@@ -3,12 +3,16 @@ package net.danielpancake.shinyinu;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -73,6 +77,17 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
 
+        int[] icons = {R.drawable.ic_save, R.drawable.ic_exit};
+
+        for (int i = 0; i < icons.length; i++) {
+
+            MenuItem item = menu.getItem(i);
+            SpannableStringBuilder newMenuTitle = new SpannableStringBuilder("*     " + item.getTitle());
+            newMenuTitle.setSpan(new CenteredImageSpan(this, icons[i]), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            item.setTitle(newMenuTitle);
+
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -108,6 +123,8 @@ public class MainActivity extends AppCompatActivity {
                             out.close();
 
                             showToastBottom("Saved!");
+
+                            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(saving_image)));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
