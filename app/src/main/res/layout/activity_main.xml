@@ -7,6 +7,10 @@
     android:background="@drawable/app_background"
     tools:context=".MainActivity">
 
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/activity_toolbar" />
+
     <ImageView
         android:id="@+id/imageShibaInu"
         android:layout_width="0dp"
@@ -18,17 +22,18 @@
         app:layout_constraintBottom_toTopOf="@+id/loadShibaInu"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:srcCompat="@drawable/original" />
 
     <Button
         android:id="@+id/loadShibaInu"
+        android:background="#F5F5F5"
         android:layout_width="256dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="64dp"
-        android:background="@android:color/white"
-
         android:text="@string/button_shiny"
+        android:theme="@style/ThemeOverlay.AppCompat.Light"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
