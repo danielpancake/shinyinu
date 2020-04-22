@@ -3,9 +3,9 @@
 
     <item
         android:id="@+id/option_save"
-        android:title="Save to the gallery" />
+        android:title="@string/menu_option_save" />
 
     <item
         android:id="@+id/option_exit"
-        android:title="Exit" />
+        android:title="@string/menu_option_exit" />
 </menu>

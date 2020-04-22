@@ -32,7 +32,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="64dp"
         android:text="@string/button_shiny"
-        android:theme="@style/ThemeOverlay.AppCompat.Light"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

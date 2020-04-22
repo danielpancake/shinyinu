@@ -3,4 +3,6 @@
     <string name="button_shiny">Make my day shiny!</string>
     <string name="app_loading">Please, wait...</string>
     <string name="default_image_description">This is original image</string>
+    <string name="menu_option_save">Save to the gallery</string>
+    <string name="menu_option_exit">Exit</string>
 </resources>
