@@ -8,25 +8,28 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,6 +37,10 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int PERMISSION_REQUEST_STORAGE = 0;
+
+    private View root_view;
 
     private ShibaLoader shiba = null;
 
@@ -45,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Set up a view
+        root_view = findViewById(R.id.root_view);
 
         // Set up a toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -61,11 +71,12 @@ public class MainActivity extends AppCompatActivity {
         // Load UI elements
         final Button loadShibaInu = findViewById(R.id.loadShibaInu);
         final ImageView showShibaInu = findViewById(R.id.imageShibaInu);
+        final ProgressBar progressBar = findViewById(R.id.loadingBar);
 
         loadShibaInu.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                shiba = new ShibaLoader(getApplicationContext(), showShibaInu, loadShibaInu);
+                shiba = new ShibaLoader(getApplicationContext(), root_view, showShibaInu, loadShibaInu, progressBar);
                 shiba.execute();
             }
 
@@ -96,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.option_save:
-                if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)) {
+                if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_STORAGE)) {
 
                     if (shiba != null) {
                         try {
@@ -122,18 +133,15 @@ public class MainActivity extends AppCompatActivity {
                             out.flush();
                             out.close();
 
-                            showToastBottom("Saved!");
+                            showSnackbar("Saved!", getDrawable(R.drawable.ic_shiba_status_ok));
 
                             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(saving_image)));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     } else {
-                        showToastBottom("Already saved!");
+                        showSnackbar("Already saved!", getDrawable(R.drawable.ic_shiba_status));
                     }
-
-                } else {
-                    showToastBottom("Permission denied. Please, try again!");
                 }
 
                 break;
@@ -156,17 +164,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public Boolean checkPermission(String permission, int requestCode) {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
             return false;
         } else {
             return true;
         }
     }
 
-    public void showToastBottom(String text) {
-        Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, getResources().getInteger(R.integer.toast_offset));
-        toast.show();
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_STORAGE) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                showSnackbar("Permission granted. Awof!", getDrawable(R.drawable.ic_shiba_status_ok));
+            } else {
+                showSnackbar("Permission denied.", getDrawable(R.drawable.ic_shiba_status_bad));
+            }
+        }
+    }
+
+    public void showSnackbar(String string, Drawable icon) {
+        CustomSnackbar.make(root_view, string, icon, Snackbar.LENGTH_LONG).show();
     }
 }

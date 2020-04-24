@@ -11,10 +11,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.view.Gravity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.ProgressBar;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,20 +29,26 @@ import java.net.URL;
 public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
 
     private Context context;
+    private View view;
     private ImageView imageView;
     private Button button;
+    private ProgressBar progressBar;
 
-    ShibaLoader(Context context, ImageView imageView, Button button) {
+    ShibaLoader(Context context, View view, ImageView imageView, Button button, ProgressBar progressBar) {
 
         // We import these to change UI in AsyncTask
         this.context = context;
+        this.view = view;
         this.imageView = imageView;
         this.button = button;
+        this.progressBar = progressBar;
 
         // Don't click me!
         // Please, just wait until image's loaded
         button.setEnabled(false);
         button.setText(context.getResources().getText(R.string.app_loading));
+
+        progressBar.setVisibility(ProgressBar.VISIBLE);
     }
 
     @Override
@@ -85,6 +93,8 @@ public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
         // And then you'll be able click me again!
         button.setText(context.getResources().getText(R.string.button_shiny));
 
+        progressBar.setVisibility(ProgressBar.INVISIBLE);
+
         Handler delay = new Handler();
 
         delay.postDelayed(new Runnable() {
@@ -97,10 +107,10 @@ public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
         if (result.bitmap != null) {
             imageView.setImageBitmap(result.bitmap);
 
-            Toast toast = Toast.makeText(context, "Woof!", Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
-            toast.show();
+            CustomSnackbar.make(view, "Woof!", view.getResources().getDrawable(R.drawable.ic_shiba_status), Snackbar.LENGTH_LONG).show();
         }
-
     }
 }
+
+
+
