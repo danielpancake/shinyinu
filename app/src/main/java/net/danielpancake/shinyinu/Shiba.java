@@ -11,10 +11,10 @@ import android.graphics.Bitmap;
 
 public class Shiba {
 
-    String code;
-    Bitmap bitmap;
+    String code; //Shiba code
+    Bitmap bitmap; //Bitmap data for image
 
-    Shiba(String code, Bitmap bitmap) {
+    Shiba(String code, Bitmap bitmap) { //Setter method
         this.code = code;
         this.bitmap = bitmap;
     }

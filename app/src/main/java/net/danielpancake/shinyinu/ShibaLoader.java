@@ -43,10 +43,8 @@ public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
         this.button = button;
         this.progressBar = progressBar;
 
-        // Don't click me!
-        // Please, just wait until image's loaded
-        button.setEnabled(false);
-        button.setText(context.getResources().getText(R.string.app_loading));
+        button.setEnabled(false);                                               //Disable button click
+        button.setText(context.getResources().getText(R.string.app_loading));   //Set text to "loading"
 
         progressBar.setVisibility(ProgressBar.VISIBLE);
     }
@@ -59,9 +57,12 @@ public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
         String shibacode = null;
 
         try {
-            // We use https to prevent errors on android API 25+ (not sure)
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                    new URL("https://shibe.online/api/shibes?count=1&urls=false").openStream()));
+            // Use https to prevent errors on android API 25+
+            BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader (
+                    new URL("https://shibe.online/api/shibes?count=1&urls=false").openStream() //Open https stream and get image
+                )
+            );
 
             // Get JSON from the link above
             String inputLine = "";
@@ -74,40 +75,37 @@ public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
             // If app gets here (no error occurred), we'll get the image code
             shibacode = new JSONArray(JSON).getString(0);
 
-            // Now use it to load the actual image and then pass the image on...
             bitmap = BitmapFactory.decodeStream(
-                    new URL("https://cdn.shibe.online/shibes/" + shibacode + ".jpg").openStream());
+                new URL("https://cdn.shibe.online/shibes/" + shibacode + ".jpg").openStream() //Load image from link in json and store it
+            );
 
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            e.printStackTrace(); //If error occured then print the stack trace
         }
 
-        // ...there
-        return new Shiba(shibacode, bitmap);
+        return new Shiba(shibacode, bitmap); //Return class with filled in code and image
     }
 
     @Override
     protected void onPostExecute(Shiba result) {
 
-        // Okay, we're through. Now give a moment to catch my breath
-        // And then you'll be able click me again!
-        button.setText(context.getResources().getText(R.string.button_shiny));
+        button.setText(context.getResources().getText(R.string.button_shiny)); //Set button text back to original
 
         progressBar.setVisibility(ProgressBar.INVISIBLE);
 
-        Handler delay = new Handler();
+        //REMOVE DELAY ITS ANNOYING
+        // Handler delay = new Handler();
 
-        delay.postDelayed(new Runnable() {
-            public void run() {
-                button.setEnabled(true);
-            }
-        }, 2100);
+        // delay.postDelayed(new Runnable() {
+        //     public void run() {
+        //         button.setEnabled(true);
+        //     }
+        // }, 2100);
 
         // If all is right, set the image
         if (result.bitmap != null) {
-            imageView.setImageBitmap(result.bitmap);
-
-            CustomSnackbar.make(view, "Woof!", view.getResources().getDrawable(R.drawable.ic_shiba_status), Snackbar.LENGTH_LONG).show();
+            imageView.setImageBitmap(result.bitmap); //Set image viewport to image stored in bitmap
+            CustomSnackbar.make(view, "Woof!", view.getResources().getDrawable(R.drawable.ic_shiba_status), Snackbar.LENGTH_LONG).show(); //Indicate that image is loaded
         }
     }
 }
