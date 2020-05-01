@@ -2,6 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/option_favourite"
+        android:title="@string/menu_option_favourite" />
+
+    <item
+        android:id="@+id/option_open"
+        android:title="@string/menu_option_open" />
+
+    <item
         android:id="@+id/option_save"
         android:title="@string/menu_option_save" />
 

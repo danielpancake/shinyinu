@@ -9,7 +9,10 @@ package net.danielpancake.shinyinu;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
@@ -22,9 +25,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Random;
 
 public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
 
@@ -58,28 +63,47 @@ public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
         Bitmap bitmap = null;
         String shibacode = null;
 
-        try {
-            // We use https to prevent errors on android API 25+ (not sure)
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                    new URL("https://shibe.online/api/shibes?count=1&urls=false").openStream()));
+        // Collect information about Internet access
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-            // Get JSON from the link above
-            String inputLine = "";
+        if (networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected()) {
+            try {
+                // We use https to prevent errors on android API 25+ (not sure)
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                        new URL("https://shibe.online/api/shibes?count=1&urls=false").openStream()));
 
-            while (inputLine != null) {
-                JSON += inputLine;
-                inputLine = bufferedReader.readLine();
+                // Get JSON from the link above
+                String inputLine = "";
+
+                while (inputLine != null) {
+                    JSON += inputLine;
+                    inputLine = bufferedReader.readLine();
+                }
+
+                // If app gets here (no error occurred), we'll get the image code
+                shibacode = new JSONArray(JSON).getString(0);
+
+                // Now use it to load the actual image and then pass the image on...
+                bitmap = BitmapFactory.decodeStream(
+                        new URL("https://cdn.shibe.online/shibes/" + shibacode + ".jpg").openStream());
+
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
             }
 
-            // If app gets here (no error occurred), we'll get the image code
-            shibacode = new JSONArray(JSON).getString(0);
+        } else {
+            // If there's no internet connection, load one of the saved images
+            File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/ShinyInu");
+            File[] imagesList = directory.listFiles();
 
-            // Now use it to load the actual image and then pass the image on...
-            bitmap = BitmapFactory.decodeStream(
-                    new URL("https://cdn.shibe.online/shibes/" + shibacode + ".jpg").openStream());
+            if (imagesList.length > 0) {
+                Random random = new Random();
+                File image = imagesList[random.nextInt(imagesList.length)];
 
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
+                bitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
+                shibacode = image.getName();
+            }
         }
 
         // ...there
@@ -89,7 +113,7 @@ public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
     @Override
     protected void onPostExecute(Shiba result) {
 
-        // Okay, we're through. Now give a moment to catch my breath
+        // Okay, we're through. Now give me a moment to catch my breath
         // And then you'll be able click me again!
         button.setText(context.getResources().getText(R.string.button_shiny));
 
@@ -101,7 +125,7 @@ public class ShibaLoader extends AsyncTask<Void, Void, Shiba> {
             public void run() {
                 button.setEnabled(true);
             }
-        }, 2100);
+        }, 500);
 
         // If all is right, set the image
         if (result.bitmap != null) {
