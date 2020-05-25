@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_view"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@drawable/app_background"
@@ -9,13 +11,42 @@
         android:id="@+id/toolbar"
         layout="@layout/activity_toolbar" />
 
+    <ImageView
+        android:id="@+id/nothing_here"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_shiba_placeholder"
+        app:layout_constraintBottom_toBottomOf="@+id/grid_view"
+        app:layout_constraintEnd_toEndOf="@+id/grid_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
     <GridView
         android:id="@+id/grid_view"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_gravity="bottom"
-        android:gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:numColumns="auto_fit"
-        android:stretchMode="columnWidth" />
+        android:stretchMode="columnWidth"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
-</LinearLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/photo_viewer_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:background="@drawable/app_background"
+        android:backgroundTint="#40000000"
+        android:backgroundTintMode="src_over"
+        android:visibility="invisible">
+
+        <com.github.chrisbanes.photoview.PhotoView
+            android:id="@+id/photo_viewer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

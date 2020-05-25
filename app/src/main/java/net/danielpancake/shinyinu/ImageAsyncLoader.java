@@ -5,11 +5,18 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
+import java.io.File;
+
 public class ImageAsyncLoader extends AsyncTask<String, Void, Bitmap> {
 
     ImageView imageView;
     String imageCode;
-    byte[] imagePreview;
+    byte[] imagePreview = null;
+
+    ImageAsyncLoader(ImageView imageView, String imageCode) {
+        this.imageView = imageView;
+        this.imageCode = imageCode;
+    }
 
     ImageAsyncLoader(ImageView imageView, String imageCode, byte[] imagePreview) {
         this.imageView = imageView;
@@ -29,10 +36,10 @@ public class ImageAsyncLoader extends AsyncTask<String, Void, Bitmap> {
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
             MainActivity.getMemoryCache().addBitmapToMemoryCache(imageCode, bitmap, false);
-        } else {
-            // TODO: Blur image if it's just a preview
+        } else if (imagePreview != null) {
+            Bitmap imagePreviewBitmap = new BitmapBlurred(imageView.getContext(),
+                    BitmapFactory.decodeByteArray(imagePreview, 0, imagePreview.length), 4).create();
 
-            Bitmap imagePreviewBitmap = BitmapFactory.decodeByteArray(imagePreview, 0, imagePreview.length);
             imageView.setImageBitmap(imagePreviewBitmap);
 
             MainActivity.getMemoryCache().addBitmapToMemoryCache(imageCode, imagePreviewBitmap, true);
@@ -42,19 +49,23 @@ public class ImageAsyncLoader extends AsyncTask<String, Void, Bitmap> {
     }
 
     public Bitmap decodeURI(String filePath) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
+        if ((new File(filePath).exists())) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
 
-        // Just load some information about the image
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filePath, options);
+            // Just load some information about the image
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(filePath, options);
 
-        // Scale down the image
-        double ratio = options.outHeight >= options.outWidth ? options.outHeight / 240 : options.outWidth / 240;
-        options.inSampleSize = (int) Math.pow(2d, Math.floor(Math.log(ratio) / Math.log(2d)));
+            // Scale down the image
+            double ratio = options.outHeight >= options.outWidth ? options.outHeight / 240 : options.outWidth / 240;
+            options.inSampleSize = (int) Math.pow(2d, Math.floor(Math.log(ratio) / Math.log(2d)));
 
-        options.inJustDecodeBounds = false;
-        options.inTempStorage = new byte[512];
+            options.inJustDecodeBounds = false;
+            options.inTempStorage = new byte[512];
 
-        return BitmapFactory.decodeFile(filePath, options);
+            return BitmapFactory.decodeFile(filePath, options);
+        } else {
+            return null;
+        }
     }
 }

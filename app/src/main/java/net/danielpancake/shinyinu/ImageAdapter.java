@@ -5,17 +5,18 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class ImageAdapter extends BaseAdapter {
-
-    /* TODO: load chosen image; open fullscreen image on click */
 
     private Context context;
 
@@ -59,7 +60,7 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public String getItem(int position) {
         return imagesList.get(position);
     }
 
@@ -69,26 +70,45 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView = new ImageView(context);
+    public FrameLayout getView(int position, View convertView, ViewGroup parent) {
+        FrameLayout frameLayout = new FrameLayout(context);
 
+        ImageView imageView = new ImageView(context);
+        ImageView imageViewOverlay = new ImageView(context);
+
+        imageView.setId(position);
         imageView.setPadding(4, 4, 4, 4);
         imageView.setCropToPadding(true);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         imageView.setLayoutParams(new GridView.LayoutParams(size, size));
 
+        imageViewOverlay.setPadding(4, 4, 4, 4);
+        imageViewOverlay.setLayoutParams(new GridView.LayoutParams(size, size));
+
         imageView.setImageDrawable(context.getDrawable(R.drawable.ic_shiba_placeholder));
 
-        // If image is not in the memory cache load it from storage
+        String imagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
+                "/ShinyInu/" + imagesList.get(position) + ".jpg";
+
         if (MainActivity.getMemoryCache().getBitmapFromMemoryCache(imagesList.get(position)) == null) {
             ImageAsyncLoader imageAsyncLoader = new ImageAsyncLoader(imageView, imagesList.get(position), imagesPreviewList.get(position));
-            imageAsyncLoader.execute(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/ShinyInu/"
-                    + imagesList.get(position) + ".jpg");
+            imageAsyncLoader.execute(imagePath);
         } else {
             imageView.setImageBitmap(MainActivity.getMemoryCache().getBitmapFromMemoryCache(imagesList.get(position)));
         }
 
-        return imageView;
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.selectableItemBackground, typedValue, true);
+        imageViewOverlay.setBackgroundResource(typedValue.resourceId);
+
+        if (!new File(imagePath).exists()) {
+            frameLayout.setForeground(context.getDrawable(R.drawable.ic_load));
+        }
+
+        frameLayout.addView(imageView);
+        frameLayout.addView(imageViewOverlay);
+
+        return frameLayout;
     }
 }
 

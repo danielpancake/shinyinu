@@ -54,7 +54,7 @@ public class CenteredImageSpan extends ImageSpan {
         int transY = bottom - b.getBounds().bottom +
                 (drawableHeight - fontDescent + fontAscent) / 2;
 
-        canvas.translate(x, transY);
+        canvas.translate(x, transY - 2);
         b.draw(canvas);
         canvas.restore();
     }
