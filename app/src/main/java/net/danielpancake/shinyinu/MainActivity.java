@@ -6,8 +6,6 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -30,15 +28,9 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -46,15 +38,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity {
-
-    private static final int PERMISSION_REQUEST_STORAGE = 0;
-
-    private View root_view;
-    private SharedPreferences settings;
+public class MainActivity extends BasicActivity {
 
     public static MemoryCache memoryCache = new MemoryCache();
 
+    private View root_view;
+    private SharedPreferences settings;
     private Bitmap bitmap;
     private String shibacode;
     private ShibaLoader shibaLoader = null;
@@ -67,35 +56,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Set screen orientation to portrait
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Load settings
         settings = getSharedPreferences("Settings", 0);
 
+        // If application is started for the first time show screen with hints
         if (settings.getBoolean("ShowSplashScreen", true)) {
+
             setContentView(R.layout.control_hint);
 
-            final Button splash_screen = findViewById(R.id.imageHint);
-            final CheckBox skip = findViewById(R.id.showAgainBox);
+            final Button screen_bounds = findViewById(R.id.imageHint);
+            final CheckBox splash_skip_box = findViewById(R.id.showAgainBox);
 
-            splash_screen.setOnClickListener(new View.OnClickListener() {
+            screen_bounds.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    splash_screen.setEnabled(false);
+                    screen_bounds.setEnabled(false);
 
                     SharedPreferences.Editor editor = settings.edit();
-                    editor.putBoolean("ShowSplashScreen", !skip.isChecked());
+                    editor.putBoolean("ShowSplashScreen", !splash_skip_box.isChecked());
                     editor.apply();
 
+                    // Fade animation
                     final Animation fadeout = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_out);
                     final Animation fadein = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_in);
 
                     findViewById(R.id.root_view).startAnimation(fadeout);
+
                     fadeout.setAnimationListener(new Animation.AnimationListener() {
                         @Override
                         public void onAnimationStart(Animation animation) {
@@ -104,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onAnimationEnd(Animation animation) {
                             setContentView(R.layout.activity_main);
-                            init();
+                            initialize();
                             findViewById(R.id.root_view).startAnimation(fadein);
                         }
 
@@ -116,11 +105,11 @@ public class MainActivity extends AppCompatActivity {
             });
         } else {
             setContentView(R.layout.activity_main);
-            init();
+            initialize();
         }
     }
 
-    protected void init() {
+    protected void initialize() {
         // Set up a view
         root_view = findViewById(R.id.root_view);
 
@@ -138,9 +127,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Load UI elements
         final Button loadShibaInu = findViewById(R.id.loadShibaInu);
+        final ImageView imageAVD = findViewById(R.id.imageAVD);
         final ImageView showShibaInu = findViewById(R.id.imageShibaInu);
-        final ImageView imageHeart = findViewById(R.id.imageHeart);
         final ProgressBar progressBar = findViewById(R.id.loadingBar);
+
+        new ImageAdjuster(this, showShibaInu, BitmapFactory.decodeResource(getResources(), R.drawable.original));
 
         loadShibaInu.setOnClickListener(new View.OnClickListener() {
 
@@ -156,12 +147,14 @@ public class MainActivity extends AppCompatActivity {
         showShibaInu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // This is double click realization
                 if (System.currentTimeMillis() - doubleClickLastTime < 300) {
                     doubleClickLastTime = 0;
 
                     if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_STORAGE)) {
+                        // Setup heart vector animation
                         Drawable heart = getDrawable(R.drawable.ic_favourite_adv);
-                        imageHeart.setImageDrawable(heart);
+                        imageAVD.setImageDrawable(heart);
 
                         AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) heart;
                         animatedVectorDrawable.stop();
@@ -170,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
                         shibaGet(); // Get information about the image
                         // Save the image to external storage
                         bitmapSaveToFile(shibacode, bitmap, false);
-
                         // and then to the database
                         SQLiteDatabase database = dbHelper.getWritableDatabase();
 
@@ -182,8 +174,6 @@ public class MainActivity extends AppCompatActivity {
                         if (cursor.getCount() > 0) {
                             showSnackbar("Already added to favourite.", getDrawable(R.drawable.ic_shiba_status));
                         } else {
-                            showSnackbar("Added to favourite!", getDrawable(R.drawable.ic_shiba_favourite));
-
                             ContentValues contentValues = new ContentValues();
 
                             // Put image code to the database
@@ -198,6 +188,8 @@ public class MainActivity extends AppCompatActivity {
                             // Put small scaled down image to the database
                             contentValues.put(DBHelper.KEY_BITMAP_PREVIEW, image);
                             database.insert(DBHelper.TABLE_SHINY, null, contentValues);
+
+                            showSnackbar("Added to favourite!", getDrawable(R.drawable.ic_shiba_favourite));
                         }
 
                         cursor.close();
@@ -212,10 +204,10 @@ public class MainActivity extends AppCompatActivity {
         showShibaInu.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Drawable heart = getDrawable(R.drawable.ic_share_adv);
-                imageHeart.setImageDrawable(heart);
+                Drawable avdshare = getDrawable(R.drawable.ic_share_adv);
+                imageAVD.setImageDrawable(avdshare);
 
-                AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) heart;
+                AnimatedVectorDrawable animatedVectorDrawable = (AnimatedVectorDrawable) avdshare;
                 animatedVectorDrawable.stop();
                 animatedVectorDrawable.start();
 
@@ -302,6 +294,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void bitmapSaveToFile(String name, Bitmap bitmap, boolean showMessage) {
         File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/ShinyInu");
+
         if (!directory.isDirectory()) {
             directory.mkdirs();
         }
@@ -322,31 +315,11 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(saving_image)));
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else if (showMessage) {
             showSnackbar("Already saved.", getDrawable(R.drawable.ic_shiba_status));
-        }
-    }
-
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_STORAGE) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showSnackbar("Permission granted. Awof!", getDrawable(R.drawable.ic_shiba_status_ok));
-            } else {
-                showSnackbar("Permission denied.", getDrawable(R.drawable.ic_shiba_status_bad));
-            }
-        }
-    }
-
-    private boolean checkPermission(String permission, int requestCode) {
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
-            return false;
-        } else {
-            return true;
         }
     }
 
@@ -380,9 +353,5 @@ public class MainActivity extends AppCompatActivity {
         } catch (NullPointerException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    private void showSnackbar(String string, Drawable icon) {
-        CustomSnackbar.make(root_view, string, icon, Snackbar.LENGTH_LONG).show();
     }
 }

@@ -7,11 +7,15 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 
-public class BitmapBlurred {
+/*
+    Name says for itself. This class blurs bitmap
+*/
 
-    Context context;
-    Bitmap bitmap;
-    int blurSize;
+class BitmapBlurred {
+
+    private Context context;
+    private Bitmap bitmap;
+    private int blurSize;
 
     BitmapBlurred(Context context, Bitmap bitmap, int blurSize) {
         this.context = context;
@@ -34,4 +38,5 @@ public class BitmapBlurred {
 
         return bitmap;
     }
+
 }

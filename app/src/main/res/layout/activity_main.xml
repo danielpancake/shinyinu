@@ -55,7 +55,7 @@
         app:layout_constraintTop_toTopOf="@+id/containerShibaInu" />
 
     <ImageView
-        android:id="@+id/imageHeart"
+        android:id="@+id/imageAVD"
         android:layout_width="128dp"
         android:layout_height="128dp"
         android:src="@drawable/ic_favourite_adv"

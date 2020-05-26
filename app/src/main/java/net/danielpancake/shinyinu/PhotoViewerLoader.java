@@ -1,5 +1,6 @@
 package net.danielpancake.shinyinu;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -10,10 +11,12 @@ import java.io.File;
 
 public class PhotoViewerLoader extends AsyncTask<String, Void, Bitmap> {
 
-    PhotoView photoViewer;
+    private Context context;
+    private PhotoView photoViewer;
 
     PhotoViewerLoader(PhotoView photoViewer) {
         this.photoViewer = photoViewer;
+        this.context = photoViewer.getContext();
     }
 
     @Override
@@ -22,7 +25,7 @@ public class PhotoViewerLoader extends AsyncTask<String, Void, Bitmap> {
         if ((new File(urls[0]).exists())) {
             return BitmapFactory.decodeFile(urls[0]);
         } else {
-            return BitmapFactory.decodeResource(photoViewer.getContext().getResources(), R.drawable.ic_shiba_placeholder);
+            return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_shiba_placeholder);
         }
 
     }

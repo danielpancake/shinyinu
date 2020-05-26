@@ -3,12 +3,8 @@ package net.danielpancake.shinyinu;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,42 +21,27 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.github.chrisbanes.photoview.PhotoView;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 
-public class GridViewActivity extends AppCompatActivity {
-
-    private static final int PERMISSION_REQUEST_STORAGE = 0;
+public class GridViewActivity extends BasicActivity {
 
     private ImageAdapter gridAdapter;
-    private View root_view;
 
     private PhotoView photoViewer;
     private View photoViewerContainer;
 
-    @SuppressLint("SourceLockedOrientationActivity")
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
-
-        // Set up a view
-        root_view = findViewById(R.id.root_view);
 
         // Set up a toolbar
         final Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setSubtitle("> Bookmarked");
         setSupportActionBar(toolbar);
-
-        // Set screen orientation to portrait
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set up database
         DBHelper dbHelper = new DBHelper(this);
@@ -77,14 +58,14 @@ public class GridViewActivity extends AppCompatActivity {
         photoViewerContainer = findViewById(R.id.photo_viewer_container);
         photoViewer = findViewById(R.id.photo_viewer);
 
-        ImageView nothingToShow = findViewById(R.id.nothing_here);
-
         // Create grid view
         GridView gridView = findViewById(R.id.grid_view);
         gridAdapter = new ImageAdapter(this, dbHelper, metrics.widthPixels);
         gridView.setAdapter(gridAdapter);
 
+        // If there's nothing to show, put an image of sleeping Shiba
         if (gridAdapter.getCount() > 0) {
+            ImageView nothingToShow = findViewById(R.id.nothing_here);
             nothingToShow.setVisibility(View.GONE);
         }
 
@@ -139,8 +120,6 @@ public class GridViewActivity extends AppCompatActivity {
                 newMenuTitle.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.design_default_color_error)), 0, newMenuTitle.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 item.setTitle(newMenuTitle);
 
-                final Context context = view.getContext();
-
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
@@ -151,7 +130,6 @@ public class GridViewActivity extends AppCompatActivity {
 
                                 Intent share = new Intent(Intent.ACTION_SEND);
 
-                                share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                 share.setType("image/jpg");
                                 share.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(shared_image));
                                 share.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message));
@@ -169,10 +147,16 @@ public class GridViewActivity extends AppCompatActivity {
                 });
 
                 popupMenu.show();
-
                 return true;
             }
         });
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_STORAGE && grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            MainActivity.memoryCache.removeAllFromMemoryCache();
+            gridAdapter.notifyDataSetChanged();
+        }
     }
 
     void setPhotoViewerInvisible() {
@@ -197,26 +181,10 @@ public class GridViewActivity extends AppCompatActivity {
         });
     }
 
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_STORAGE) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showSnackbar("Permission granted. Awof!", getDrawable(R.drawable.ic_shiba_status_ok));
-
-                MainActivity.memoryCache.removeAllFromMemoryCache();
-                gridAdapter.notifyDataSetChanged();
-            } else {
-                showSnackbar("Permission denied.", getDrawable(R.drawable.ic_shiba_status_bad));
-            }
-        }
-    }
-
-    private boolean checkPermission(String permission, int requestCode) {
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
-            return false;
-        } else {
-            return true;
-        }
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return super.onSupportNavigateUp();
     }
 
     @Override
@@ -227,15 +195,5 @@ public class GridViewActivity extends AppCompatActivity {
             super.onBackPressed();
             finish();
         }
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return super.onSupportNavigateUp();
-    }
-
-    private void showSnackbar(String string, Drawable icon) {
-        CustomSnackbar.make(root_view, string, icon, Snackbar.LENGTH_LONG).show();
     }
 }

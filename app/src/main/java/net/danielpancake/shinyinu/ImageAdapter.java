@@ -71,6 +71,7 @@ public class ImageAdapter extends BaseAdapter {
 
     @Override
     public FrameLayout getView(int position, View convertView, ViewGroup parent) {
+        // Create custom layout programmatically
         FrameLayout frameLayout = new FrameLayout(context);
 
         ImageView imageView = new ImageView(context);
@@ -90,6 +91,7 @@ public class ImageAdapter extends BaseAdapter {
         String imagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
                 "/ShinyInu/" + imagesList.get(position) + ".jpg";
 
+        // If image isn't in memory cache load it from database or external storage
         if (MainActivity.getMemoryCache().getBitmapFromMemoryCache(imagesList.get(position)) == null) {
             ImageAsyncLoader imageAsyncLoader = new ImageAsyncLoader(imageView, imagesList.get(position), imagesPreviewList.get(position));
             imageAsyncLoader.execute(imagePath);
@@ -97,6 +99,7 @@ public class ImageAdapter extends BaseAdapter {
             imageView.setImageBitmap(MainActivity.getMemoryCache().getBitmapFromMemoryCache(imagesList.get(position)));
         }
 
+        // This code sets background of overlay to ?attr/selectableItemBackground
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, typedValue, true);
         imageViewOverlay.setBackgroundResource(typedValue.resourceId);

@@ -1,11 +1,9 @@
 package net.danielpancake.shinyinu;
 
 /*
-
-    Class by misaka-10032
+    Author: misaka-10032
     https://stackoverflow.com/questions/25628258/align-text-around-imagespan-center-vertical
     Date: 25.05.2015
-
  */
 
 import android.content.Context;
@@ -22,7 +20,7 @@ import java.lang.ref.WeakReference;
 public class CenteredImageSpan extends ImageSpan {
     private WeakReference<Drawable> mDrawableRef;
 
-    public CenteredImageSpan(Context context, final int drawableRes) {
+    CenteredImageSpan(Context context, final int drawableRes) {
         super(context, drawableRes);
     }
 

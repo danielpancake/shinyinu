@@ -1,22 +1,19 @@
 package net.danielpancake.shinyinu;
 
 /*
-
     This class loads Shiba's image from shibe.online
 
+    Author: danielpancake
 */
 
 import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -88,41 +85,8 @@ public class ShibaLoader extends ImageLoader {
 
         // If all is right, set the image
         if (result.bitmap != null) {
-
             // But firstly adjust screen size
-            final RelativeLayout parent = (RelativeLayout) imageView.getParent();
-            final BitmapDrawable bitmapDrawable = new BitmapDrawable(context.getResources(), result.bitmap);
-
-            parent.post(new Runnable() {
-                @Override
-                public void run() {
-                    int boundWidth = parent.getWidth();
-                    int boundHeight = parent.getHeight();
-
-                    int originalWidth = bitmapDrawable.getBitmap().getWidth();
-                    int originalHeight = bitmapDrawable.getBitmap().getHeight();
-                    int newWidth = originalWidth;
-                    int newHeight = originalHeight;
-
-                    if (newWidth < boundWidth || newWidth > boundWidth) {
-                        newWidth = boundWidth;
-                        newHeight = newWidth * originalHeight / originalWidth;
-                    }
-
-                    if (newHeight > boundHeight) {
-                        newHeight = boundHeight;
-                        newWidth = newHeight * originalWidth / originalHeight;
-                    }
-
-                    ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-                    layoutParams.height = newHeight;
-                    layoutParams.width = newWidth;
-
-                    imageView.setLayoutParams(layoutParams);
-                    imageView.setBackground(bitmapDrawable);
-                }
-            });
-
+            new ImageAdjuster(context, imageView, result.bitmap);
             CustomSnackbar.make(view, "Woof!", view.getResources().getDrawable(R.drawable.ic_shiba_status), Snackbar.LENGTH_LONG).show();
         }
     }
