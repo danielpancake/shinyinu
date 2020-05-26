@@ -30,4 +30,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
     }
+
+    public void deleteItem(String code) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DELETE from " + TABLE_SHINY + " WHERE " + KEY_CODE + " = " + "'" + code + "'");
+    }
 }

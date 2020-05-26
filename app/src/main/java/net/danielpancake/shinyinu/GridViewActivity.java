@@ -64,9 +64,9 @@ public class GridViewActivity extends BasicActivity {
         gridView.setAdapter(gridAdapter);
 
         // If there's nothing to show, put an image of sleeping Shiba
+        final ImageView nothingToShow = findViewById(R.id.nothing_here);
         if (gridAdapter.getCount() > 0) {
-            ImageView nothingToShow = findViewById(R.id.nothing_here);
-            nothingToShow.setVisibility(View.GONE);
+            nothingToShow.setVisibility(View.INVISIBLE);
         }
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -138,7 +138,13 @@ public class GridViewActivity extends BasicActivity {
                                 break;
 
                             case R.id.option_remove:
-                                // TODO: removing from database, grid and memory
+                                if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_STORAGE)) {
+                                    gridAdapter.removeItem(position);
+
+                                    if (gridAdapter.getCount() == 0) {
+                                        nothingToShow.setVisibility(View.VISIBLE);
+                                    }
+                                }
                                 break;
                         }
 

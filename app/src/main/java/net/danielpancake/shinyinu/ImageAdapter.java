@@ -19,14 +19,16 @@ import java.util.ArrayList;
 public class ImageAdapter extends BaseAdapter {
 
     private Context context;
+    private DBHelper dbhelper;
 
     private ArrayList<String> imagesList = new ArrayList<>();
     private ArrayList<byte[]> imagesPreviewList = new ArrayList<>();
 
     private int size;
 
-    public ImageAdapter(Context context, DBHelper dbHelper, int size) {
+    ImageAdapter(Context context, DBHelper dbHelper, int size) {
         this.context = context;
+        this.dbhelper = dbHelper;
 
         // Count how many squares 240x240 can fit in one row of grid
         int count = (int) Math.floor(size / 240);
@@ -89,14 +91,14 @@ public class ImageAdapter extends BaseAdapter {
         imageView.setImageDrawable(context.getDrawable(R.drawable.ic_shiba_placeholder));
 
         String imagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
-                "/ShinyInu/" + imagesList.get(position) + ".jpg";
+                "/ShinyInu/" + getItem(position) + ".jpg";
 
         // If image isn't in memory cache load it from database or external storage
-        if (MainActivity.getMemoryCache().getBitmapFromMemoryCache(imagesList.get(position)) == null) {
-            ImageAsyncLoader imageAsyncLoader = new ImageAsyncLoader(imageView, imagesList.get(position), imagesPreviewList.get(position));
+        if (MainActivity.getMemoryCache().getBitmapFromMemoryCache(getItem(position)) == null) {
+            ImageAsyncLoader imageAsyncLoader = new ImageAsyncLoader(imageView, getItem(position), imagesPreviewList.get(position));
             imageAsyncLoader.execute(imagePath);
         } else {
-            imageView.setImageBitmap(MainActivity.getMemoryCache().getBitmapFromMemoryCache(imagesList.get(position)));
+            imageView.setImageBitmap(MainActivity.getMemoryCache().getBitmapFromMemoryCache(getItem(position)));
         }
 
         // This code sets background of overlay to ?attr/selectableItemBackground
@@ -112,6 +114,19 @@ public class ImageAdapter extends BaseAdapter {
         frameLayout.addView(imageViewOverlay);
 
         return frameLayout;
+    }
+
+    void removeItem(int position) {
+        MainActivity.getMemoryCache().removeBitmapFromMemoryCache(getItem(position));
+
+        (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
+                "/ShinyInu/" + getItem(position) + ".jpg")).delete();
+
+        imagesList.remove(position);
+        imagesPreviewList.remove(position);
+        dbhelper.deleteItem(getItem(position));
+
+        notifyDataSetChanged();
     }
 }
 
