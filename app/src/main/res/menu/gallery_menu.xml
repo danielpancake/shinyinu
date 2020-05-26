@@ -6,5 +6,9 @@
 
     <item
         android:id="@+id/option_remove"
-        android:title="@string/menu_option_remove" />
+        android:title="Remove" />
+
+    <item
+        android:id="@+id/option_delete"
+        android:title="@string/menu_option_delete" />
 </menu>

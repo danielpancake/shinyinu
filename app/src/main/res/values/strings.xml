@@ -12,7 +12,7 @@
     <string name="menu_option_about">About</string>
     <string name="share_title">Choose an app</string>
     <string name="check_box_show_again">Do not show again</string>
-    <string name="menu_option_remove">Remove</string>
+    <string name="menu_option_delete">Delete (Can\'t be undone)</string>
     <string name="permission_granted">Permission granted. Awof!</string>
     <string name="permission_denied">Permission denied.</string>
 </resources>

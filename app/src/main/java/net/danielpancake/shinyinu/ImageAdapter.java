@@ -117,16 +117,19 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     void removeItem(int position) {
+        new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
+                "/ShinyInu/" + getItem(position) + ".jpg").delete();
+
         MainActivity.getMemoryCache().removeBitmapFromMemoryCache(getItem(position));
+        notifyDataSetChanged();
+    }
 
-        (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
-                "/ShinyInu/" + getItem(position) + ".jpg")).delete();
+    void deleteItem(int position) {
+        removeItem(position);
 
+        dbhelper.deleteItem(getItem(position));
         imagesList.remove(position);
         imagesPreviewList.remove(position);
-        dbhelper.deleteItem(getItem(position));
-
-        notifyDataSetChanged();
     }
 }
 

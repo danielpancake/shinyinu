@@ -3,6 +3,7 @@ package net.danielpancake.shinyinu;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -21,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 
 import com.github.chrisbanes.photoview.PhotoView;
@@ -96,14 +98,14 @@ public class GridViewActivity extends BasicActivity {
 
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+            public boolean onItemLongClick(AdapterView<?> parent, final View view, final int position, long id) {
                 final String code = gridAdapter.getItem(position);
 
                 PopupMenu popupMenu = new PopupMenu(view.getContext(), view);
                 MenuInflater inflater = popupMenu.getMenuInflater();
                 inflater.inflate(R.menu.gallery_menu, popupMenu.getMenu());
 
-                int[] icons = {R.drawable.ic_share, R.drawable.ic_remove};
+                int[] icons = {R.drawable.ic_share, R.drawable.ic_remove, R.drawable.ic_delete};
 
                 for (int i = 0; i < icons.length; i++) {
 
@@ -114,7 +116,12 @@ public class GridViewActivity extends BasicActivity {
 
                 }
 
-                MenuItem item = popupMenu.getMenu().getItem(1);
+                if (!new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
+                        "/ShinyInu/" + code + ".jpg").exists()) {
+                    popupMenu.getMenu().getItem(1).setEnabled(false);
+                }
+
+                MenuItem item = popupMenu.getMenu().getItem(2);
                 SpannableStringBuilder newMenuTitle = new SpannableStringBuilder(item.getTitle());
                 newMenuTitle.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, newMenuTitle.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 newMenuTitle.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.design_default_color_error)), 0, newMenuTitle.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -140,10 +147,25 @@ public class GridViewActivity extends BasicActivity {
                             case R.id.option_remove:
                                 if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_STORAGE)) {
                                     gridAdapter.removeItem(position);
+                                }
+                                break;
 
-                                    if (gridAdapter.getCount() == 0) {
-                                        nothingToShow.setVisibility(View.VISIBLE);
-                                    }
+                            case R.id.option_delete:
+                                if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_STORAGE)) {
+                                    new AlertDialog.Builder(view.getContext())
+                                            .setMessage("Are you sure?")
+                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    gridAdapter.deleteItem(position);
+
+                                                    if (gridAdapter.getCount() == 0) {
+                                                        nothingToShow.setVisibility(View.VISIBLE);
+                                                    }
+                                                }
+
+                                            }).setNegativeButton("No", null).show();
                                 }
                                 break;
                         }
