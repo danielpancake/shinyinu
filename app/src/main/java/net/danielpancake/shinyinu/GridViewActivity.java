@@ -13,15 +13,18 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 
@@ -36,21 +39,29 @@ public class GridViewActivity extends BasicActivity {
     private PhotoView photoViewer;
     private View photoViewerContainer;
 
+    private ActionBar actionBar;
+    private View buttonBack;
+
+    private boolean buttonBackIsShowm;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
 
-        // Set up a toolbar
-        final Toolbar toolbar = findViewById(R.id.toolbar);
+        // Set up toolbars
+        Toolbar toolbar = findViewById(R.id.toolbar).findViewById(R.id.actual_toolbar);
         toolbar.setSubtitle("> Bookmarked");
         setSupportActionBar(toolbar);
+
+        actionBar = getSupportActionBar();
 
         // Set up database
         DBHelper dbHelper = new DBHelper(this);
 
-        // Set up home button
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        // Set up home buttons
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(true);
+        buttonBack = findViewById(R.id.button_back);
 
         // Get screen width
         DisplayMetrics metrics = new DisplayMetrics();
@@ -66,7 +77,7 @@ public class GridViewActivity extends BasicActivity {
         gridView.setAdapter(gridAdapter);
 
         // If there's nothing to show, put an image of sleeping Shiba
-        final ImageView nothingToShow = findViewById(R.id.nothing_here);
+        final View nothingToShow = findViewById(R.id.nothing_here);
         if (gridAdapter.getCount() > 0) {
             nothingToShow.setVisibility(View.INVISIBLE);
         }
@@ -118,6 +129,7 @@ public class GridViewActivity extends BasicActivity {
 
                 if (!new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
                         "/ShinyInu/" + code + ".jpg").exists()) {
+                    popupMenu.getMenu().getItem(0).setEnabled(false);
                     popupMenu.getMenu().getItem(1).setEnabled(false);
                 }
 
@@ -135,11 +147,13 @@ public class GridViewActivity extends BasicActivity {
                                 File shared_image = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
                                         "/ShinyInu/" + code + ".jpg");
 
+                                Uri contentUri = Uri.parse("file://" + shared_image);
                                 Intent share = new Intent(Intent.ACTION_SEND);
 
-                                share.setType("image/jpg");
-                                share.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(shared_image));
+                                share.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                share.putExtra(Intent.EXTRA_STREAM, contentUri);
                                 share.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message));
+                                share.setType("image/jpg");
 
                                 startActivity(Intent.createChooser(share, getString(R.string.share_title)));
                                 break;
@@ -178,6 +192,24 @@ public class GridViewActivity extends BasicActivity {
                 return true;
             }
         });
+
+        photoViewer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (buttonBackIsShowm) {
+                    buttonBackHide();
+                } else {
+                    buttonBackShow();
+                }
+            }
+        });
+
+        buttonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setPhotoViewerInvisible();
+            }
+        });
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -188,12 +220,14 @@ public class GridViewActivity extends BasicActivity {
     }
 
     void setPhotoViewerInvisible() {
-        getSupportActionBar().show();
+        actionBar.show();
         photoViewerContainer.animate().alpha(0f).setDuration(150).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 photoViewerContainer.setVisibility(View.INVISIBLE);
                 photoViewer.setImageBitmap(null);
+
+                buttonBackHide();
             }
         });
     }
@@ -204,14 +238,47 @@ public class GridViewActivity extends BasicActivity {
             @Override
             public void onAnimationEnd(Animator animation) {
                 photoViewerContainer.setVisibility(View.VISIBLE);
-                getSupportActionBar().hide();
+                actionBar.hide();
+
+                buttonBackShow();
             }
         });
     }
 
+    void buttonBackShow() {
+        TranslateAnimation animate = new TranslateAnimation(0, 0, -((View) buttonBack.getParent()).getHeight(), 0);
+        animate.setDuration(500);
+        animate.setFillAfter(true);
+
+        buttonBack.startAnimation(animate);
+        buttonBackIsShowm = true;
+    }
+
+    void buttonBackHide() {
+        TranslateAnimation animate = new TranslateAnimation(0, 0, 0, -((View) buttonBack.getParent()).getHeight());
+        animate.setDuration(500);
+        animate.setFillAfter(true);
+
+        buttonBack.startAnimation(animate);
+        buttonBackIsShowm = false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (photoViewerContainer.getVisibility() == View.VISIBLE) {
+            getMenuInflater().inflate(R.menu.menu, menu);
+        }
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        if (photoViewerContainer.getVisibility() == View.VISIBLE) {
+            setPhotoViewerInvisible();
+        } else {
+            finish();
+        }
         return super.onSupportNavigateUp();
     }
 

@@ -11,6 +11,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.AnimatedVectorDrawable;
+
+import androidx.appcompat.widget.Toolbar;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,7 +31,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
 import java.io.ByteArrayOutputStream;
@@ -114,7 +115,7 @@ public class MainActivity extends BasicActivity {
         root_view = findViewById(R.id.root_view);
 
         // Set up a toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.actual_toolbar);
         setSupportActionBar(toolbar);
 
         // Set up database
