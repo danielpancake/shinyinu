@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Shiny Inu</string>
+    <string name="menu_option_exit">Выйти</string>
+    <string name="menu_option_settings">Настройки</string>
+    <string name="calculating">Расчёт...</string>
+    <string name="menu_option_about">О приложении</string>
+    <string name="menu_option_share">Поделиться</string>
+    <string name="app_loading">Пожалуйста, подождите...</string>
+    <string name="default_image_description">Это исходное изображение</string>
+    <string name="share_title">Выберете приложение</string>
+    <string name="permission_denied">Отказано в доступе.</string>
+    <string name="permission_granted">Разрешение получено. Вуф!</string>
+    <string name="check_box_show_again">Не показывать снова</string>
+    <string name="menu_option_delete">Удалить (Нельзя отменить)</string>
+    <string name="option_no">Нет</string>
+    <string name="option_yes">Да</string>
+    <string name="are_you_sure">Вы уверены?</string>
+    <string name="menu_option_remove">Стереть</string>
+    <string name="title_bookmarked">Закладки</string>
+    <string name="menu_option_save">Сохранить в галерею</string>
+    <string name="menu_option_open">Открыть закладки</string>
+    <string name="share_message">Хей, посмотри на эту милашку! Она сделала мой день ярче и может сделать твой. Смотреть на гитхабе: https://github.com/DanielPancake/shinyinu</string>
+    <string name="button_shiny">Сделай мой день ярче!</string>
+    <string name="delete_database">Удалить базу данных</string>
+    <string name="clear_saved_images">Очистить Сохранённые Картинки</string>
+    <string name="woof">Вуф!</string>
+    <string name="saved">Сохранено!</string>
+    <string name="saved_already">Уже сохранено</string>
+    <string name="close_app">Вы действительно хотите выйти?</string>
+    <string name="errror">Произошла ошибка!</string>
+    <string name="no_internet">Нет доступных изображений. Нет подключения к интернету!</string>
+    <string name="favourite">Добавлено в закладки!</string>
+    <string name="favourite_already">Уже в закладках</string>
+    <string name="clear_description">Очистка сохранённых изображений удалит все файлы изображений, которые были добавлены в закладки. Это означает, что вы сможете загрузить их заново в любое время.</string>
+    <string name="megabytes">МБ</string>
+    <string name="kilobytes">КБ</string>
+    <string name="title_settings">Настройки</string>
+    <string name="saved_images">Сохранённые изображения</string>
+    <string name="can_be_cleared">Может быть очищено</string>
+    <string name="nothing_to_show">Пока что нечего показать</string>
+</resources>

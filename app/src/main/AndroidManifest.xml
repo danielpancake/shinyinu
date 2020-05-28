@@ -35,6 +35,8 @@
         </activity>
 
         <activity android:name=".GridViewActivity" />
+
+        <activity android:name=".SettingsActivity" />
     </application>
 
 </manifest>

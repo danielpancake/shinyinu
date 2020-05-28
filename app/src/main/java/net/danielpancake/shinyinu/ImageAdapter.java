@@ -41,12 +41,12 @@ public class ImageAdapter extends BaseAdapter {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
         Cursor resultSet = database.query(DBHelper.TABLE_SHINY, new String[]{DBHelper.KEY_CODE, DBHelper.KEY_BITMAP_PREVIEW}, null, null, null, null, null);
 
-        if (resultSet.moveToFirst() != false) {
+        if (resultSet.moveToFirst()) {
             for (int i = 0; i < resultSet.getCount(); i++) {
                 imagesList.add(resultSet.getString(resultSet.getColumnIndex(DBHelper.KEY_CODE)));
                 imagesPreviewList.add(resultSet.getBlob(resultSet.getColumnIndex(DBHelper.KEY_BITMAP_PREVIEW)));
 
-                if (resultSet.moveToNext() == false) {
+                if (!resultSet.moveToNext()) {
                     break;
                 }
             }

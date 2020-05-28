@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Nothing to show yet"
+            android:text="@string/nothing_to_show"
             android:textColor="@android:color/background_light"
             android:textSize="24sp"
             android:textStyle="bold"

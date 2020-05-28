@@ -87,7 +87,7 @@ public class ShibaLoader extends ImageLoader {
         if (result.bitmap != null) {
             // But firstly adjust screen size
             new ImageAdjuster(context, imageView, result.bitmap);
-            CustomSnackbar.make(view, "Woof!", view.getResources().getDrawable(R.drawable.ic_shiba_status), Snackbar.LENGTH_LONG).show();
+            CustomSnackbar.make(view, context.getString(R.string.woof), view.getResources().getDrawable(R.drawable.ic_shiba_status), Snackbar.LENGTH_LONG).show();
         }
     }
 }

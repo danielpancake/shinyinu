@@ -11,8 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.AnimatedVectorDrawable;
-
-import androidx.appcompat.widget.Toolbar;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
 import java.io.ByteArrayOutputStream;
@@ -173,7 +172,7 @@ public class MainActivity extends BasicActivity {
                                 null, null, null, "1");
 
                         if (cursor.getCount() > 0) {
-                            showSnackbar("Already added to favourite.", getDrawable(R.drawable.ic_shiba_status));
+                            showSnackbar(getString(R.string.favourite_already), getDrawable(R.drawable.ic_shiba_status));
                         } else {
                             ContentValues contentValues = new ContentValues();
 
@@ -190,7 +189,7 @@ public class MainActivity extends BasicActivity {
                             contentValues.put(DBHelper.KEY_BITMAP_PREVIEW, image);
                             database.insert(DBHelper.TABLE_SHINY, null, contentValues);
 
-                            showSnackbar("Added to favourite!", getDrawable(R.drawable.ic_shiba_favourite));
+                            showSnackbar(getString(R.string.favourite), getDrawable(R.drawable.ic_shiba_favourite));
                         }
 
                         cursor.close();
@@ -285,6 +284,11 @@ public class MainActivity extends BasicActivity {
                 }
                 break;
 
+            case R.id.option_settings:
+                Intent settings = new Intent(this, SettingsActivity.class);
+                startActivity(settings);
+                break;
+
             case R.id.option_exit:
                 closeApp();
                 break;
@@ -312,7 +316,7 @@ public class MainActivity extends BasicActivity {
                 memoryCache.removeBitmapFromMemoryCache(name);
 
                 if (showMessage) {
-                    showSnackbar("Saved!", getDrawable(R.drawable.ic_shiba_status_ok));
+                    showSnackbar(getString(R.string.saved), getDrawable(R.drawable.ic_shiba_status_ok));
                 }
 
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(saving_image)));
@@ -320,21 +324,21 @@ public class MainActivity extends BasicActivity {
                 e.printStackTrace();
             }
         } else if (showMessage) {
-            showSnackbar("Already saved.", getDrawable(R.drawable.ic_shiba_status));
+            showSnackbar(getString(R.string.saved_already), getDrawable(R.drawable.ic_shiba_status));
         }
     }
 
     private void closeApp() {
         new AlertDialog.Builder(this)
-                .setMessage("Are you sure you want to close the app?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setMessage(R.string.close_app)
+                .setPositiveButton(R.string.option_yes, new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         finish();
                     }
 
-                }).setNegativeButton("No", null).show();
+                }).setNegativeButton(R.string.option_no, null).show();
     }
 
     @Override

@@ -1,10 +1,10 @@
 package net.danielpancake.shinyinu;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -32,11 +32,17 @@ public class ImageLoader extends AsyncTask<String, Void, Shiba> {
     private ImageView imageView;
     private boolean randomOnError;
 
+    Drawable ic_ok;
+    Drawable ic_bad;
+
     ImageLoader(Context context, View view, ImageView imageView, boolean randomOnError) {
         this.context = context;
         this.view = view;
         this.imageView = imageView;
         this.randomOnError = randomOnError;
+
+        this.ic_ok = view.getResources().getDrawable(R.drawable.ic_shiba_status);
+        this.ic_bad = view.getResources().getDrawable(R.drawable.ic_shiba_status_bad);
     }
 
     private static String getFileNameWithoutExtension(File file) {
@@ -83,6 +89,7 @@ public class ImageLoader extends AsyncTask<String, Void, Shiba> {
                             new URL("https://cdn.shibe.online/shibes/" + code + ".jpg").openStream());
                 }
             } catch (IOException | JSONException e) {
+                CustomSnackbar.make(view, context.getString(R.string.errror), ic_bad, Snackbar.LENGTH_LONG).show();
                 e.printStackTrace();
             }
         } else {
@@ -97,10 +104,10 @@ public class ImageLoader extends AsyncTask<String, Void, Shiba> {
                     bitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
                     code = getFileNameWithoutExtension(image);
                 } else {
-                    CustomSnackbar.make(view, "No available images to show. No internet connection!", view.getResources().getDrawable(R.drawable.ic_shiba_status), Snackbar.LENGTH_LONG).show();
+                    CustomSnackbar.make(view, context.getString(R.string.no_internet), ic_ok, Snackbar.LENGTH_LONG).show();
                 }
             } else {
-                CustomSnackbar.make(view, "Error occurred!", view.getResources().getDrawable(R.drawable.ic_shiba_status_bad), Snackbar.LENGTH_LONG).show();
+                CustomSnackbar.make(view, context.getString(R.string.no_internet), ic_ok, Snackbar.LENGTH_LONG).show();
             }
         }
 

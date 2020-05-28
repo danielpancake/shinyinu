@@ -50,7 +50,7 @@ public class GridViewActivity extends BasicActivity {
 
         // Set up toolbars
         Toolbar toolbar = findViewById(R.id.toolbar).findViewById(R.id.actual_toolbar);
-        toolbar.setSubtitle("> Bookmarked");
+        toolbar.setSubtitle("> " + getString(R.string.title_bookmarked));
         setSupportActionBar(toolbar);
 
         actionBar = getSupportActionBar();
@@ -167,8 +167,8 @@ public class GridViewActivity extends BasicActivity {
                             case R.id.option_delete:
                                 if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_STORAGE)) {
                                     new AlertDialog.Builder(view.getContext())
-                                            .setMessage("Are you sure?")
-                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                            .setMessage(R.string.are_you_sure)
+                                            .setPositiveButton(R.string.option_yes, new DialogInterface.OnClickListener() {
 
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
@@ -179,7 +179,7 @@ public class GridViewActivity extends BasicActivity {
                                                     }
                                                 }
 
-                                            }).setNegativeButton("No", null).show();
+                                            }).setNegativeButton(R.string.option_no, null).show();
                                 }
                                 break;
                         }
@@ -225,9 +225,8 @@ public class GridViewActivity extends BasicActivity {
             @Override
             public void onAnimationEnd(Animator animation) {
                 photoViewerContainer.setVisibility(View.INVISIBLE);
-                photoViewer.setImageBitmap(null);
-
                 buttonBackHide();
+                photoViewer.setImageBitmap(null);
             }
         });
     }
@@ -238,9 +237,8 @@ public class GridViewActivity extends BasicActivity {
             @Override
             public void onAnimationEnd(Animator animation) {
                 photoViewerContainer.setVisibility(View.VISIBLE);
-                actionBar.hide();
-
                 buttonBackShow();
+                actionBar.hide();
             }
         });
     }
@@ -249,6 +247,10 @@ public class GridViewActivity extends BasicActivity {
         TranslateAnimation animate = new TranslateAnimation(0, 0, -((View) buttonBack.getParent()).getHeight(), 0);
         animate.setDuration(500);
         animate.setFillAfter(true);
+
+        if (actionBar.isShowing()) {
+            animate.setStartOffset(1000);
+        }
 
         buttonBack.startAnimation(animate);
         buttonBackIsShowm = true;
