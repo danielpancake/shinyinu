@@ -45,4 +45,5 @@
     <string name="intro_text_01">You can double click on the image to add it to the favourite!</string>
     <string name="intro_text_02">Want to share with friends? Hold the image to do that.</string>
     <string name="intro_text_03">You wonder what it does? It shows new image of course.</string>
+    <string name="delete_description">Deleting database will clear list of favourite images. Notice that this action cannot be undone! Database cannot be entirely empty, so its size will not reach zero.</string>
 </resources>
