@@ -244,24 +244,24 @@ public class GridViewActivity extends BasicActivity {
     }
 
     void buttonBackShow() {
-        TranslateAnimation animate = new TranslateAnimation(0, 0, -((View) buttonBack.getParent()).getHeight(), 0);
-        animate.setDuration(500);
-        animate.setFillAfter(true);
+        TranslateAnimation animation = new TranslateAnimation(0, 0, -((View) buttonBack.getParent()).getHeight(), 0);
+        animation.setDuration(500);
+        animation.setFillAfter(true);
 
         if (actionBar.isShowing()) {
-            animate.setStartOffset(1000);
+            animation.setStartOffset(1000);
         }
 
-        buttonBack.startAnimation(animate);
+        buttonBack.startAnimation(animation);
         buttonBackIsShowm = true;
     }
 
     void buttonBackHide() {
-        TranslateAnimation animate = new TranslateAnimation(0, 0, 0, -((View) buttonBack.getParent()).getHeight());
-        animate.setDuration(500);
-        animate.setFillAfter(true);
+        TranslateAnimation animation = new TranslateAnimation(0, 0, 0, -((View) buttonBack.getParent()).getHeight());
+        animation.setDuration(500);
+        animation.setFillAfter(true);
 
-        buttonBack.startAnimation(animate);
+        buttonBack.startAnimation(animation);
         buttonBackIsShowm = false;
     }
 

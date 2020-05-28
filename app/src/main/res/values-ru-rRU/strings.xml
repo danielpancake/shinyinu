@@ -8,7 +8,7 @@
     <string name="menu_option_share">Поделиться</string>
     <string name="app_loading">Пожалуйста, подождите...</string>
     <string name="default_image_description">Это исходное изображение</string>
-    <string name="share_title">Выберете приложение</string>
+    <string name="share_title">Выберите приложение</string>
     <string name="permission_denied">Отказано в доступе.</string>
     <string name="permission_granted">Разрешение получено. Вуф!</string>
     <string name="check_box_show_again">Не показывать снова</string>
@@ -39,4 +39,11 @@
     <string name="saved_images">Сохранённые изображения</string>
     <string name="can_be_cleared">Может быть очищено</string>
     <string name="nothing_to_show">Пока что нечего показать</string>
+    <string name="made">Сделал</string>
+    <string name="intro_title_01">Посмотрите, это же Сиба-Ину!</string>
+    <string name="intro_title_02">Она прямо светится</string>
+    <string name="intro_title_03">Интересная кнопка</string>
+    <string name="intro_text_01">Вы можете кликнуть на картинку дважды, чтобы сохранить её в закладки!</string>
+    <string name="intro_text_02">Хотите поделиться с друзьями? Зажмите картинку, чтобы отправить её.</string>
+    <string name="intro_text_03">Задаётесь вопросом, что она делает? Показывает новую картинку, конечно же.</string>
 </resources>

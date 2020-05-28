@@ -38,4 +38,11 @@
     <string name="saved_images">Saved images</string>
     <string name="can_be_cleared">Can be cleared</string>
     <string name="nothing_to_show">Nothing to show yet</string>
+    <string name="made">Made by</string>
+    <string name="intro_title_01">Look, a Shiba!</string>
+    <string name="intro_title_02">It is so shiny</string>
+    <string name="intro_title_03">Interesting button</string>
+    <string name="intro_text_01">You can double click on the image to add it to the favourite!</string>
+    <string name="intro_text_02">Want to share with friends? Hold the image to do that.</string>
+    <string name="intro_text_03">You wonder what it does? It shows new image of course.</string>
 </resources>

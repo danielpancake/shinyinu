@@ -15,22 +15,26 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.ViewGroup;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
+
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -42,8 +46,9 @@ public class MainActivity extends BasicActivity {
 
     public static MemoryCache memoryCache = new MemoryCache();
 
-    private View root_view;
     private SharedPreferences settings;
+
+    private View root_view;
     private Bitmap bitmap;
     private String shibacode;
     private ShibaLoader shibaLoader = null;
@@ -58,58 +63,8 @@ public class MainActivity extends BasicActivity {
     @SuppressLint("SourceLockedOrientationActivity")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        // Load settings
-        settings = getSharedPreferences("Settings", 0);
-
-        // If application is started for the first time show screen with hints
-        if (settings.getBoolean("ShowSplashScreen", true)) {
-
-            setContentView(R.layout.control_hint);
-
-            final Button screen_bounds = findViewById(R.id.imageHint);
-            final CheckBox splash_skip_box = findViewById(R.id.showAgainBox);
-
-            screen_bounds.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    screen_bounds.setEnabled(false);
-
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putBoolean("ShowSplashScreen", !splash_skip_box.isChecked());
-                    editor.apply();
-
-                    // Fade animation
-                    final Animation fadeout = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_out);
-                    final Animation fadein = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_in);
-
-                    findViewById(R.id.root_view).startAnimation(fadeout);
-
-                    fadeout.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            setContentView(R.layout.activity_main);
-                            initialize();
-                            findViewById(R.id.root_view).startAnimation(fadein);
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-                        }
-                    });
-                }
-            });
-        } else {
-            setContentView(R.layout.activity_main);
-            initialize();
-        }
-    }
-
-    protected void initialize() {
         // Set up a view
         root_view = findViewById(R.id.root_view);
 
@@ -130,6 +85,22 @@ public class MainActivity extends BasicActivity {
         final ImageView imageAVD = findViewById(R.id.imageAVD);
         final ImageView showShibaInu = findViewById(R.id.imageShibaInu);
         final ProgressBar progressBar = findViewById(R.id.loadingBar);
+
+        // Set up settings
+        settings = getSharedPreferences("Settings", 0);
+
+        // Show tutorial
+        if (settings.getBoolean("showcase", true)) {
+            loadShibaInu.setVisibility(View.INVISIBLE);
+
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showIntro(getString(R.string.intro_title_01), getString(R.string.intro_text_01), new View[]{showShibaInu, showShibaInu, loadShibaInu}, 0);
+                }
+            }, 100);
+        }
 
         new ImageAdjuster(this, showShibaInu, BitmapFactory.decodeResource(getResources(), R.drawable.original));
 
@@ -248,6 +219,65 @@ public class MainActivity extends BasicActivity {
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    void showIntro(String title, String text, final View[] view, final int phase) {
+        ShowcaseView.Builder showcase = showcase(title, text, view[phase]);
+
+        final ShowcaseView build = showcase.build();
+        build.hideButton();
+
+        build.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    switch (phase) {
+                        case 0:
+                            showIntro(getString(R.string.intro_title_02), getString(R.string.intro_text_02), view, 1);
+                            build.hide();
+                            break;
+
+                        case 1:
+                            View button = view[2];
+                            button.setVisibility(View.VISIBLE);
+                            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) button.getLayoutParams();
+
+                            TranslateAnimation animation = new TranslateAnimation(0, 0, button.getHeight() + marginLayoutParams.bottomMargin, 0);
+                            animation.setDuration(1000);
+                            animation.setFillAfter(true);
+
+                            button.startAnimation(animation);
+
+                            showIntro(getString(R.string.intro_title_03), getString(R.string.intro_text_03), view, 2);
+                            build.hide();
+                            break;
+
+                        case 2:
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putBoolean("showcase", false);
+                            editor.apply();
+
+                            build.hide();
+                            break;
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+    }
+
+    ShowcaseView.Builder showcase(String title, String text, View view) {
+        ShowcaseView.Builder showcase = new ShowcaseView.Builder(this)
+                .setTarget(new ViewTarget(view))
+                .setStyle(R.style.CustomShowcaseTheme)
+                .setContentTitle(title)
+                .setContentText(text)
+                .hideOnTouchOutside();
+
+        return showcase;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -282,6 +312,10 @@ public class MainActivity extends BasicActivity {
                     shibaGet();
                     bitmapSaveToFile(shibacode, bitmap, true);
                 }
+                break;
+
+            case R.id.option_about:
+                showSnackbar(getString(R.string.made) + " danielpancake", getDrawable(R.drawable.ic_shiba_status));
                 break;
 
             case R.id.option_settings:
