@@ -65,7 +65,6 @@ public class ImageLoader extends AsyncTask<String, Void, Shiba> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-
         ((FrameLayout) imageView.getParent()).setForeground(null);
     }
 
@@ -78,7 +77,7 @@ public class ImageLoader extends AsyncTask<String, Void, Shiba> {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-        if (JSON[0] != null && networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected()) {
+        if (JSON != null && networkInfo != null && networkInfo.isAvailable() && networkInfo.isConnected()) {
             try {
                 code = new JSONArray(JSON[0]).getString(0);
 
@@ -89,7 +88,7 @@ public class ImageLoader extends AsyncTask<String, Void, Shiba> {
                             new URL("https://cdn.shibe.online/shibes/" + code + ".jpg").openStream());
                 }
             } catch (IOException | JSONException e) {
-                CustomSnackbar.make(view, context.getString(R.string.errror), ic_bad, Snackbar.LENGTH_LONG).show();
+                CustomSnackbar.make(view, context.getString(R.string.errror), ic_bad, Snackbar.LENGTH_LONG, null, null).show();
                 e.printStackTrace();
             }
         } else {
@@ -104,10 +103,10 @@ public class ImageLoader extends AsyncTask<String, Void, Shiba> {
                     bitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
                     code = getFileNameWithoutExtension(image);
                 } else {
-                    CustomSnackbar.make(view, context.getString(R.string.no_internet), ic_ok, Snackbar.LENGTH_LONG).show();
+                    CustomSnackbar.make(view, context.getString(R.string.no_internet), ic_ok, Snackbar.LENGTH_LONG, null, null).show();
                 }
             } else {
-                CustomSnackbar.make(view, context.getString(R.string.no_internet), ic_ok, Snackbar.LENGTH_LONG).show();
+                CustomSnackbar.make(view, context.getString(R.string.no_internet), ic_ok, Snackbar.LENGTH_LONG, null, null).show();
             }
         }
 

@@ -58,7 +58,7 @@ public class BasicActivity extends AppCompatActivity {
         // Get root view of layout
         View root_view = findViewById(R.id.root_view);
         if (root_view != null) {
-            CustomSnackbar.make(root_view, string, icon, Snackbar.LENGTH_LONG).show();
+            CustomSnackbar.make(root_view, string, icon, Snackbar.LENGTH_LONG, null, null).show();
         }
     }
 }

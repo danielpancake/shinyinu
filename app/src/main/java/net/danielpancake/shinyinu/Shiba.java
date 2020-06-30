@@ -9,7 +9,7 @@ import android.graphics.Bitmap;
     Author: danielpancake
 */
 
-public class Shiba {
+class Shiba {
 
     String code;
     Bitmap bitmap;

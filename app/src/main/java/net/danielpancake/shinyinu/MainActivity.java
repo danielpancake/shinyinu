@@ -41,17 +41,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class MainActivity extends BasicActivity {
 
     public static MemoryCache memoryCache = new MemoryCache();
+    public static Shiba shiba;
+    public static Shiba prevShiba;
 
     private SharedPreferences settings;
 
     private View root_view;
-    private Bitmap bitmap;
-    private String shibacode;
-    private ShibaLoader shibaLoader = null;
+    private ShibaLoader shibaLoader;
     private DBHelper dbHelper;
 
     private long doubleClickLastTime = 0;
@@ -77,8 +79,7 @@ public class MainActivity extends BasicActivity {
 
         // Set default image and code
         //     in case you want to save it
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.original);
-        shibacode = "Original";
+        shiba = new Shiba("Original", BitmapFactory.decodeResource(getResources(), R.drawable.original));
 
         // Load UI elements
         final Button loadShibaInu = findViewById(R.id.loadShibaInu);
@@ -105,14 +106,21 @@ public class MainActivity extends BasicActivity {
         new ImageAdjuster(this, showShibaInu, BitmapFactory.decodeResource(getResources(), R.drawable.original));
 
         loadShibaInu.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View v) {
-                shibaLoader = new ShibaLoader(v.getContext(), root_view, showShibaInu, loadShibaInu, progressBar);
-                shibaLoader.execute();
+                try {
+                    shibaLoader = new ShibaLoader(v.getContext(), root_view, showShibaInu, loadShibaInu, progressBar, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new ImageAdjuster(v.getContext(), showShibaInu, prevShiba.bitmap);
+                            shiba = prevShiba;
+                        }
+                    });
 
-                // Don't use shiba.get here because it causing app to lag
+                    shibaLoader.execute(new JSONGetter().execute("https://shibe.online/api/shibes?count=1&urls=false").get(15000, TimeUnit.MILLISECONDS));
+                } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                    e.printStackTrace();
+                }
             }
-
         });
 
         showShibaInu.setOnClickListener(new View.OnClickListener() {
@@ -131,15 +139,14 @@ public class MainActivity extends BasicActivity {
                         animatedVectorDrawable.stop();
                         animatedVectorDrawable.start();
 
-                        shibaGet(); // Get information about the image
                         // Save the image to external storage
-                        bitmapSaveToFile(shibacode, bitmap, false);
+                        bitmapSaveToFile(shiba.code, shiba.bitmap, false);
                         // and then to the database
                         SQLiteDatabase database = dbHelper.getWritableDatabase();
 
                         // Find any matches
                         Cursor cursor = database.query(DBHelper.TABLE_SHINY,
-                                new String[]{DBHelper.KEY_CODE}, DBHelper.KEY_CODE + " =?", new String[]{shibacode},
+                                new String[]{DBHelper.KEY_CODE}, DBHelper.KEY_CODE + " =?", new String[]{shiba.code},
                                 null, null, null, "1");
 
                         if (cursor.getCount() > 0) {
@@ -148,11 +155,11 @@ public class MainActivity extends BasicActivity {
                             ContentValues contentValues = new ContentValues();
 
                             // Put image code to the database
-                            contentValues.put(DBHelper.KEY_CODE, shibacode);
+                            contentValues.put(DBHelper.KEY_CODE, shiba.code);
 
                             // Scale down image to store is as a preview
                             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 64, 64, false);
+                            Bitmap scaledBitmap = Bitmap.createScaledBitmap(shiba.bitmap, 64, 64, false);
                             scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 30, byteArrayOutputStream);
                             byte[] image = byteArrayOutputStream.toByteArray();
 
@@ -182,7 +189,6 @@ public class MainActivity extends BasicActivity {
                 animatedVectorDrawable.stop();
                 animatedVectorDrawable.start();
 
-                shibaGet(); // Get information about the image
                 // This is cached storage for our image
                 File cachePath = new File(getCacheDir() + "/cache");
 
@@ -194,7 +200,7 @@ public class MainActivity extends BasicActivity {
 
                 try {
                     FileOutputStream out = new FileOutputStream(cachedImage);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                    shiba.bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
                     out.flush();
                     out.close();
                 } catch (IOException e) {
@@ -268,14 +274,12 @@ public class MainActivity extends BasicActivity {
     }
 
     ShowcaseView.Builder showcase(String title, String text, View view) {
-        ShowcaseView.Builder showcase = new ShowcaseView.Builder(this)
+        return new ShowcaseView.Builder(this)
                 .setTarget(new ViewTarget(view))
                 .setStyle(R.style.CustomShowcaseTheme)
                 .setContentTitle(title)
                 .setContentText(text)
                 .hideOnTouchOutside();
-
-        return showcase;
     }
 
     @Override
@@ -309,8 +313,7 @@ public class MainActivity extends BasicActivity {
 
             case R.id.option_save:
                 if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_STORAGE)) {
-                    shibaGet();
-                    bitmapSaveToFile(shibacode, bitmap, true);
+                    bitmapSaveToFile(shiba.code, shiba.bitmap, true);
                 }
                 break;
 
@@ -378,19 +381,5 @@ public class MainActivity extends BasicActivity {
     @Override
     public void onBackPressed() {
         closeApp();
-    }
-
-    private void shibaGet() {
-        try {
-            Shiba shiba = shibaLoader.get();
-
-            if (shiba.bitmap != null && shiba.code != null) {
-                bitmap = shiba.bitmap;
-                shibacode = shiba.code;
-            }
-
-        } catch (NullPointerException | ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,12 +18,9 @@ import com.google.android.material.snackbar.Snackbar;
 */
 
 public class CustomSnackbar {
-
-    private static Snackbar snackbar;
-
-    static Snackbar make(View view, String text, Drawable icon, int duration) {
+    static Snackbar make(View view, String text, Drawable icon, int duration, String action, final View.OnClickListener listener) {
         // Make default snackbar
-        snackbar = Snackbar.make(view, "", duration);
+        final Snackbar snackbar = Snackbar.make(view, "", duration);
         // and make its layout invisible
         snackbar.getView().setBackgroundColor(Color.TRANSPARENT);
 
@@ -30,6 +28,20 @@ public class CustomSnackbar {
         View custom = LayoutInflater.from(view.getContext()).inflate(R.layout.custom_snackbar, null);
         ((TextView) custom.findViewById(R.id.snackbar_text)).setText(text);
         ((ImageView) custom.findViewById(R.id.snackbar_icon)).setImageDrawable(icon);
+        Button actionButton = custom.findViewById(R.id.snackbar_action_button);
+
+        if (action == null) {
+            actionButton.setVisibility(View.GONE);
+        } else {
+            actionButton.setText(action);
+            actionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    listener.onClick(view);
+                    snackbar.dismiss();
+                }
+            });
+        }
 
         Snackbar.SnackbarLayout snackbarLayout = (Snackbar.SnackbarLayout) snackbar.getView();
         snackbarLayout.setPadding(0, 0, 0, 0);
@@ -38,9 +50,4 @@ public class CustomSnackbar {
 
         return snackbar;
     }
-
-    public static void show() {
-        snackbar.show();
-    }
-
 }
